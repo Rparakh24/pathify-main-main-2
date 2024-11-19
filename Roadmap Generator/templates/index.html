@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Personalized Roadmap Generator</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+  </head>
+  <body>
+    <h1>Generate Your Personalized Roadmap</h1>
+    <form method="POST" enctype="multipart/form-data">
+      <label for="desired_role">Desired Role:</label>
+      <input type="text" name="desired_role" required /><br />
+
+      <label for="skills">Skills (comma-separated):</label>
+      <input type="text" name="skills" required /><br />
+
+      <label for="year_of_college">Year of College:</label>
+      <input type="text" name="year_of_college" required /><br />
+
+      <label for="experience_level">Experience Level:</label>
+      <input type="text" name="experience_level" required /><br />
+
+      <label for="specific_areas_of_interest"
+        >Areas of Interest (comma-separated):</label
+      >
+      <input type="text" name="specific_areas_of_interest" required /><br />
+
+      <label for="learning_hours_per_week">Learning Hours per Week:</label>
+      <input type="text" name="learning_hours_per_week" required /><br />
+
+      <label for="preferred_learning_resources"
+        >Preferred Learning Resources (comma-separated):</label
+      >
+      <input type="text" name="preferred_learning_resources" required /><br />
+
+      <label for="career_goals">Career Goals:</label>
+      <input type="text" name="career_goals" required /><br />
+
+      <label for="project_experience">Project Experience:</label>
+      <input type="text" name="project_experience" required /><br />
+
+      <label for="resume">Upload Resume (PDF):</label>
+      <input type="file" name="resume" /><br />
+
+      <input type="submit" value="Generate Roadmap" />
+    </form>
+
+    {% if roadmap %}
+    <h2>Your Personalized Roadmap</h2>
+    <div class="roadmap">{{ roadmap | safe }}</div>
+    {% endif %}
+  </body>
+</html>
