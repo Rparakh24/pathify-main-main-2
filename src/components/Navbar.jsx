@@ -1,21 +1,22 @@
 import React from "react";
 import pathify from "../images/Pathify.png"
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 function Navbar(){
     return(
         <div className="navbar">
                 <ul className="nav-box">
-                    <li>Profile</li>
-                    <li>Dashboard</li>
-                    <li>Timeline</li>
+                    <Link  className="link" to="/page1"><li>Home</li></Link>
+                    <Link  className="link" to="/page2"><li>Roadmap</li></Link>
+                    <Link  className="link" to="/note"><li>Note</li></Link>
+                    <Link  className="link" to="/todo"><li>ToDo</li></Link>
                 </ul>
                 <div className="logo">
                     <img src ={pathify}></img>
                     <p>PATHIFY</p>
                 </div>
                 <div className="contact-box">
-                    <p className="font">Sign In</p>
+                <Link to="" className="font link"><li>SignIn</li></Link>
                 </div>
             </div>
     )

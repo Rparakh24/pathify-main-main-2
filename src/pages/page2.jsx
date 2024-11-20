@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-
+import Navbar from "../components/Navbar";
 function App() {
   const [formData, setFormData] = useState({
     desired_role: "",
@@ -51,6 +51,7 @@ function App() {
 
   return (
     <div>
+    <Navbar/>
     <div className="container">
       <div className="tle">Roadmap</div>
       <form onSubmit={handleSubmit} className="form">

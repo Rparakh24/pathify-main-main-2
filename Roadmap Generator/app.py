@@ -57,6 +57,7 @@ def generate_roadmap():
     roadmap_html = markdown.markdown(response.text)
 
     # Send the response back as JSON
+    print(roadmap_html)
     return jsonify({"roadmap": roadmap_html})
 
 if __name__ == '__main__':
