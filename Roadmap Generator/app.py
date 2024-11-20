@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import pathlib
 import PyPDF2
 import markdown
+import spacy
 import google.generativeai as genai
 from flask_cors import CORS
 
@@ -13,8 +14,78 @@ GOOGLE_API_KEY = "AIzaSyBETNW377tQProfB5UKXb8iDlfbBW3QCns"
 genai.configure(api_key=GOOGLE_API_KEY)
 model = genai.GenerativeModel('gemini-1.5-flash')
 
+# Load the SpaCy model for NLP processing
+nlp = spacy.load("en_core_web_sm")
+
+def extract_information(resume_text):
+    """Extract skills, experience, and education from the resume text."""
+    doc = nlp(resume_text)
+
+    # Extract skills (based on nouns and verbs in the text)
+    skills = list(set(token.text for token in doc if token.pos_ in {"NOUN", "VERB"}))
+
+    # Extract experience (phrases containing the word 'experience')
+    experience = [chunk.text for chunk in doc.noun_chunks if "experience" in chunk.text.lower()]
+
+    # Extract education (organizations with 'University' in their name)
+    education = [ent.text for ent in doc.ents if ent.label_ == "ORG" and "University" in ent.text]
+
+    return skills, experience, education
+
+@app.route('/screen-resume', methods=['POST'])
+def screen_resume():
+    """Endpoint to process the uploaded resume and screen the candidate."""
+    if 'resume' not in request.files:
+        return jsonify({'error': 'No file part in the request'}), 400
+
+    file = request.files['resume']
+
+    if file.filename == '':
+        return jsonify({'error': 'File name is empty'}), 400
+
+    try:
+        # Extract text from the uploaded PDF
+        pdf_reader = PyPDF2.PdfReader(file)
+        text = ''
+        for page in pdf_reader.pages:
+            text += page.extract_text()
+
+        # Extract skills, experience, and education from the resume
+        skills, experience, education = extract_information(text)
+
+        # Create the prompt for the generative AI model
+        prompt = f"""
+        Analyze the following resume:
+
+        {text}
+
+        The candidate has the following skills: {', '.join(skills)}
+        The candidate has the following experience: {', '.join(experience)}
+        The candidate has the following education: {', '.join(education)}
+
+        Assess the candidate's suitability for a software engineer position. 
+        Provide feedback on the resume's strengths and weaknesses.
+        """
+
+        # Call the generative AI model
+        response = model.generate_content(prompt)
+
+        if response:
+            return jsonify({
+                'skills': skills,
+                'experience': experience,
+                'education': education,
+                'analysis': response.text
+            })
+        else:
+            return jsonify({'error': 'Failed to analyze resume'}), 500
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/generate-roadmap', methods=['POST'])
 def generate_roadmap():
+    """Endpoint to generate a personalized roadmap."""
     data = request.form
 
     # Gather input from the form
@@ -53,12 +124,12 @@ def generate_roadmap():
     # Call the generative model
     response = model.generate_content(prompt)
 
-    # Convert the Markdown content to HTML
-    roadmap_html = markdown.markdown(response.text)
-
-    # Send the response back as JSON
-    print(roadmap_html)
-    return jsonify({"roadmap": roadmap_html})
+    if response:
+        # Convert the Markdown content to HTML
+        roadmap_html = markdown.markdown(response.text)
+        return jsonify({"roadmap": roadmap_html})
+    else:
+        return jsonify({'error': 'Failed to generate roadmap'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
